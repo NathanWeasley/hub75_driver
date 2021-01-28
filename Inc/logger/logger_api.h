@@ -5,6 +5,9 @@
 #include <stdio.h>
 
 #define LOGGER_BUFFER_SIZE      (1024)
+#define LOGGER_CR               "\r"
+#define LOGGER_LF               "\n"
+#define LOGGER_CRLF             "\r\n"
 
 typedef enum
 {

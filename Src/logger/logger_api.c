@@ -23,6 +23,6 @@ void report(logger_level_e level, const char * fmt, ...)
     if (bytes2send > 0)
     {
         HAL_UART_Transmit(&huart2, logbuf, bytes2send, bytes2send / 20 + 1);
-        HAL_UART_Transmit(&huart2, "\r\n", 2, 1);
+        HAL_UART_Transmit(&huart2, LOGGER_CRLF, 2, 1);
     }
 }

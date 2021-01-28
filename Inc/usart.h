@@ -30,7 +30,10 @@
 
 /* USER CODE END Includes */
 
+#define CMD_RX_BUFFER_SIZE      (512)
+
 extern UART_HandleTypeDef huart2;
+extern char RxBuffer[CMD_RX_BUFFER_SIZE];
 
 /* USER CODE BEGIN Private defines */
 

@@ -152,6 +152,11 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void UART2_Rx_Handler(UART_HandleTypeDef* uartHandle)
+{
+    ;
+}
+
 /* USER CODE END 4 */
 
 /**
@@ -162,7 +167,12 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+  static int enterred = 0;
+  if (enterred == 0)
+  {
+    report(LOGGER_FATAL, "Unhandled exception.");
+    enterred = 1;
+  }
   /* USER CODE END Error_Handler_Debug */
 }
 

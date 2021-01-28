@@ -52,6 +52,7 @@ extern "C" {
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
+void UART2_Rx_Handler(UART_HandleTypeDef* uartHandle);
 
 /* USER CODE BEGIN EFP */
 
