@@ -22,7 +22,7 @@ TARGET = P2.5_64x32_F103
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -Og
+OPT = -O3
 
 
 #######################################

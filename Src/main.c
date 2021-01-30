@@ -71,7 +71,7 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+    uint8_t i = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -103,13 +103,15 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_SPI1_Init();
-  MX_SPI2_Init();
-  MX_TIM2_Init();
-  MX_TIM3_Init();
+  MX_SPI1_Init();               ///< SPI for frame receiving
+  MX_SPI2_Init();               ///< SPI for row data output
+  MX_TIM2_Init();               ///< Timer for PWM generation
+  MX_TIM3_Init();               ///< Timer for frame generation
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-    report(LOGGER_INFO, "Modules initialized.");
+  NW_UART_Send("Hello\r\n", 7);
+  for (i = 0; i < 20; ++i)
+    report(LOGGER_INFO, "Test output: %d.", i);
   /* USER CODE END 2 */
 
   /* Infinite loop */

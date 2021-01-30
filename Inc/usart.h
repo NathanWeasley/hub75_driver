@@ -32,11 +32,29 @@
 
 /* USER CODE BEGIN Private defines */
 
+#define UART_CMD_BUFFER_SIZE    (1024)
+
+extern volatile int8_t g_bUartIsSending;
+
 /* USER CODE END Private defines */
 
 void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+
+__STATIC_INLINE void NW_UART_SetSendingFlag()
+{
+    g_bUartIsSending = 1;
+}
+
+__STATIC_INLINE void NW_UART_ClearSendingFlag()
+{
+    g_bUartIsSending = 0;
+}
+
+int8_t NW_UART_Send(const char * str, uint32_t len);            ///< Blocking
+int8_t NW_UART_Send_DMA(const char * str, uint32_t len);        ///< Non-blocking
+const char * NW_UART_Get_Received();
 
 /* USER CODE END Prototypes */
 

@@ -23,6 +23,7 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -231,7 +232,11 @@ void DMA1_Channel5_IRQHandler(void)
 void DMA1_Channel7_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
-
+    if (LL_DMA_IsActiveFlag_TC7(DMA1))
+    {
+        LL_DMA_ClearFlag_TC7(DMA1);
+        NW_UART_ClearSendingFlag();
+    }
   /* USER CODE END DMA1_Channel7_IRQn 0 */
   
   /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */

@@ -36,24 +36,13 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_spi.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_dma.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_exti.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_gpio.c \
+Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_pwr.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_rcc.c \
+Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_spi.c \
+Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_tim.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_usart.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_utils.c \
 Src/dma.c \
@@ -61,10 +50,10 @@ Src/gpio.c \
 Src/logger/logger_api.c \
 Src/main.c \
 Src/spi.c \
-Src/stm32f1xx_hal_msp.c \
 Src/stm32f1xx_it.c \
 Src/system_stm32f1xx.c \
 Src/tim.c \
+Src/timing/timing.c \
 Src/usart.c
 
 
@@ -121,9 +110,16 @@ AS_DEFS =
 
 # C defines
 C_DEFS =  \
+-DHSE_STARTUP_TIMEOUT=100 \
+-DHSE_VALUE=8000000 \
+-DHSI_VALUE=8000000 \
+-DLSE_STARTUP_TIMEOUT=5000 \
+-DLSE_VALUE=32768 \
+-DLSI_VALUE=40000 \
+-DPREFETCH_ENABLE=1 \
 -DSTM32F103xB \
 -DUSE_FULL_LL_DRIVER \
--DUSE_HAL_DRIVER
+-DVDD_VALUE=3300
 
 
 # AS includes
@@ -134,9 +130,9 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
 -IDrivers/CMSIS/Include \
 -IDrivers/STM32F1xx_HAL_Driver/Inc \
--IDrivers/STM32F1xx_HAL_Driver/Inc/Legacy \
 -IInc \
--IInc/logger
+-IInc/logger \
+-IInc/timing
 
 
 
@@ -212,13 +208,13 @@ $(BUILD_DIR):
 # flash
 #######################################
 flash: $(BUILD_DIR)/$(TARGET).elf
-	openocd -f interface/stlink.cfg  -f target/stm32f1x.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
+	openocd -f interface/stlink.cfg  -f target/stm32f0x.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
 
 #######################################
 # erase
 #######################################
 erase: $(BUILD_DIR)/$(TARGET).elf
-	openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; reset halt; stm32f1x mass_erase 0; exit"
+	openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "init; reset halt;  mass_erase 0; exit"
 
 #######################################
 # clean up

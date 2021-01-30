@@ -70,7 +70,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void NW_New_Command(const char * cmd);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

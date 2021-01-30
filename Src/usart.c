@@ -21,7 +21,11 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-#include <string.h>
+
+volatile int8_t g_bUartIsSending = 0;
+char g_pUartReceiveBuffer[UART_CMD_BUFFER_SIZE] = { 0 };
+char *g_pUartReceiveBufferReader = g_pUartReceiveBuffer;
+
 /* USER CODE END 0 */
 
 /* USART2 init function */
@@ -54,18 +58,13 @@ void MX_USART2_UART_Init(void)
   
   /* USART2_TX Init */
   LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_7, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
-
   LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_7, LL_DMA_PRIORITY_LOW);
-
   LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_7, LL_DMA_MODE_NORMAL);
-
   LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_7, LL_DMA_PERIPH_NOINCREMENT);
-
   LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_7, LL_DMA_MEMORY_INCREMENT);
-
   LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_7, LL_DMA_PDATAALIGN_BYTE);
-
   LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_7, LL_DMA_MDATAALIGN_BYTE);
+  LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_7);
 
   /* USART2 interrupt Init */
   NVIC_SetPriority(USART2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),3, 0));
@@ -85,6 +84,52 @@ void MX_USART2_UART_Init(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+int8_t NW_UART_Send(const char * str, uint32_t len)
+{
+    uint32_t trytimes = 2000;
+
+    if (!str || len == 0)
+        return -2;
+
+    while (len--)
+    {
+        while (g_bUartIsSending || !LL_USART_IsActiveFlag_TXE(USART2))
+        {
+            if (--trytimes == 0)
+                return -1;
+        }
+
+        LL_USART_TransmitData8(USART2, *str);
+        ++str;
+    }
+
+    return 0;
+}
+
+int8_t NW_UART_Send_DMA(const char * str, uint32_t len)
+{
+    if (!str || len == 0)
+        return -2;
+
+    ///< Wait for previous transfer
+    while (g_bUartIsSending);
+
+    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_7);          ///< Disable DMA to load new length to be tranmitted
+    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_7, len);      ///< set length to be tranmitted
+    LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_7, (uint32_t)str, (uint32_t)&(USART2->DR), LL_DMA_DIRECTION_MEMORY_TO_PERIPH); ///< configure address to be transmitted by DMA
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_7);           ///< Enable DMA again
+    LL_USART_EnableDMAReq_TX(USART2);                       ///< Fire
+
+    NW_UART_SetSendingFlag();
+
+    return 0;
+}
+
+const char * NW_UART_Get_Received()
+{
+    return g_pUartReceiveBufferReader;
+}
 
 /* USER CODE END 1 */
 
