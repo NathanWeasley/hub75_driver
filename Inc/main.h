@@ -83,6 +83,8 @@ void NW_New_Command(const char * cmd);
 #define RGBLED_B_GPIO_Port GPIOC
 #define RGBLED_C_Pin LL_GPIO_PIN_2
 #define RGBLED_C_GPIO_Port GPIOC
+#define RGBLED_D_Pin LL_GPIO_PIN_3
+#define RGBLED_D_GPIO_Port GPIOC
 #define RGBLED_nOE_Pin LL_GPIO_PIN_0
 #define RGBLED_nOE_GPIO_Port GPIOA
 #define USART_TX_Pin LL_GPIO_PIN_2

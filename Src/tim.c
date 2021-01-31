@@ -21,7 +21,12 @@
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
+#include "display/display_info.h"
 
+#define TIM2_CLK_FREQ       (72000000ul)
+#define TIM2_OVF_PER_FRAME  (NW_DISPLAY_SCAN_DIVIDER * NW_DISPLAY_DEPTH)
+#define TIM2_OVF_PER_SECOND (TIM2_OVF_PER_FRAME * NW_DESIRED_FPS)
+#define TIM2_RELOAD         (TIM2_CLK_FREQ / TIM2_OVF_PER_SECOND)
 /* USER CODE END 0 */
 
 /* TIM2 init function */
@@ -40,13 +45,13 @@ void MX_TIM2_Init(void)
 
   TIM_InitStruct.Prescaler = 0;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 29951;
+  TIM_InitStruct.Autoreload = TIM2_RELOAD - 1;
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
   LL_TIM_Init(TIM2, &TIM_InitStruct);
   LL_TIM_EnableARRPreload(TIM2);
   LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
-  TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_ACTIVE;
-  TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
+  TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM2;
+  TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_ENABLE;
   TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
   TIM_OC_InitStruct.CompareValue = 0;
   TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_LOW;

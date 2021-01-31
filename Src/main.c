@@ -77,6 +77,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  
 
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_AFIO);
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
@@ -103,10 +104,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_SPI1_Init();               ///< SPI for frame receiving
-  MX_SPI2_Init();               ///< SPI for row data output
-  MX_TIM2_Init();               ///< Timer for PWM generation
-  MX_TIM3_Init();               ///< Timer for frame generation
+  MX_SPI1_Init();
+  MX_SPI2_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   NW_UART_Send("Hello\r\n", 7);
@@ -137,7 +138,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();  
   }
-  LL_RCC_HSE_EnableBypass();
   LL_RCC_HSE_Enable();
 
    /* Wait till HSE is ready */

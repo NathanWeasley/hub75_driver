@@ -45,6 +45,7 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_spi.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_tim.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_usart.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_utils.c \
+Src/display/rgb_output.c \
 Src/dma.c \
 Src/gpio.c \
 Src/logger/logger_api.c \
@@ -131,6 +132,7 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Include \
 -IDrivers/STM32F1xx_HAL_Driver/Inc \
 -IInc \
+-IInc/display \
 -IInc/logger \
 -IInc/timing
 

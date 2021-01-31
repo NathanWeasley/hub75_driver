@@ -50,7 +50,7 @@ void MX_GPIO_Init(void)
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
 
   /**/
-  LL_GPIO_ResetOutputPin(GPIOC, RGBLED_A_Pin|RGBLED_B_Pin|RGBLED_C_Pin);
+  LL_GPIO_ResetOutputPin(GPIOC, RGBLED_A_Pin|RGBLED_B_Pin|RGBLED_C_Pin|RGBLED_D_Pin);
 
   /**/
   LL_GPIO_ResetOutputPin(GPIOA, RGBLED_LAT_Pin|LD2_Pin);
@@ -69,7 +69,7 @@ void MX_GPIO_Init(void)
   LL_GPIO_SetPinMode(B1_GPIO_Port, B1_Pin, LL_GPIO_MODE_FLOATING);
 
   /**/
-  GPIO_InitStruct.Pin = RGBLED_A_Pin|RGBLED_B_Pin|RGBLED_C_Pin;
+  GPIO_InitStruct.Pin = RGBLED_A_Pin|RGBLED_B_Pin|RGBLED_C_Pin|RGBLED_D_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_MEDIUM;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
