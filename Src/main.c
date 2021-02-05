@@ -112,13 +112,17 @@ int main(void)
   /* USER CODE BEGIN 2 */
   NW_UART_Send("Hello\r\n", 7);
   for (i = 0; i < 20; ++i)
-    report(LOGGER_INFO, "Test output: %d.", i);
+    NW_Logger_Report(LOGGER_INFO, "Test output: %d.", i);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
     while (1)
     {
+        /** Check for priority table to fetch tasks */
+
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -182,7 +186,7 @@ void Error_Handler(void)
   static int enterred = 0;
   if (enterred == 0)
   {
-    report(LOGGER_FATAL, "Unhandled exception.");
+    NW_Logger_Report(LOGGER_FATAL, "Unhandled exception.");
     enterred = 1;
   }
   /* USER CODE END Error_Handler_Debug */

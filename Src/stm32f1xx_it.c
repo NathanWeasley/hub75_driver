@@ -23,7 +23,11 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "logger/logger_api.h"
 #include "usart.h"
+#include "display/rgb_output.h"
+#include "task/task.h"
+#include "gpio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -84,7 +88,7 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+    NW_Logger_Report(LOGGER_FATAL, "Hard fault occurred.");
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -99,7 +103,7 @@ void HardFault_Handler(void)
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
-
+    NW_Logger_Report(LOGGER_FATAL, "Memory management fault occurred.");
   /* USER CODE END MemoryManagement_IRQn 0 */
   while (1)
   {
@@ -114,7 +118,7 @@ void MemManage_Handler(void)
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
-
+    NW_Logger_Report(LOGGER_FATAL, "Bus fault occurred.");
   /* USER CODE END BusFault_IRQn 0 */
   while (1)
   {
@@ -129,7 +133,7 @@ void BusFault_Handler(void)
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
-
+    NW_Logger_Report(LOGGER_FATAL, "Usage fault occurred.");
   /* USER CODE END UsageFault_IRQn 0 */
   while (1)
   {
@@ -250,7 +254,20 @@ void DMA1_Channel7_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
-    
+    if (LL_TIM_IsActiveFlag_UPDATE(TIM2))
+    {
+        LL_TIM_ClearFlag_UPDATE(TIM2);
+
+        /** Select current row */
+        GPIOC->ODR = 0x0F & NW_LED_GetCurrentRow();
+
+        /** Latch loaded data */
+        RGBLED_LAT_GPIO_Port->BSRR = RGBLED_LAT_Pin;
+        RGBLED_LAT_GPIO_Port->BRR = RGBLED_LAT_Pin;
+
+        /** Bringup task for next bit/row */
+        NW_Task_StartSpecific(NW_LED_GetPrepareTask());
+    }
   /* USER CODE END TIM2_IRQn 0 */
   /* USER CODE BEGIN TIM2_IRQn 1 */
 

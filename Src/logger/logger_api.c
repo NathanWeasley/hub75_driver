@@ -3,10 +3,12 @@
 #include <stdarg.h>
 #include <string.h>
 
+#define NW_GET_LOG_LEVEL_STR()
+
 char loglevel = LOGGER_INFO;
 char logbuf[LOGGER_BUFFER_SIZE] = "";
 
-void report(logger_level_e level, const char * fmt, ...)
+void NW_Logger_Report(NW_LoggerLevel level, const char * fmt, ...)
 {
     va_list valist;
     int bytes2send = 0;

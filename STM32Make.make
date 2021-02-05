@@ -134,6 +134,7 @@ C_INCLUDES =  \
 -IInc \
 -IInc/display \
 -IInc/logger \
+-IInc/task \
 -IInc/timing
 
 

@@ -9,26 +9,30 @@
 #define LOGGER_LF               "\n"
 #define LOGGER_CRLF             "\r\n"
 
-typedef enum
-{
-    LOGGER_VERBOSE = 0,
-    LOGGER_INFO,
-    LOGGER_WARNING,
-    LOGGER_ERROR,
-    LOGGER_FATAL,
+#define LOGGER_VERBOSE          (0)
+#define LOGGER_INFO             (1)
+#define LOGGER_WARNING          (2)
+#define LOGGER_ERROR            (3)
+#define LOGGER_FATAL            (4)
+#define LOGGER_FORCE            (5)
 
-    LOGGER_LEVEL_CNT,
-    LOGGER_FORCE
-} logger_level_e;
+#define LOGGER_VERBOSE_STR      "[V] "
+#define LOGGER_INFO_STR         "[I] "
+#define LOGGER_WARNING_STR      "[W] "
+#define LOGGER_ERROR_STR        "[E] "
+#define LOGGER_FATAL_STR        "[F] "
+#define LOGGER_FORCE_STR        "[P] "
+
+typedef uint8_t NW_LoggerLevel;
 
 extern char loglevel;
 extern char logbuf[LOGGER_BUFFER_SIZE];
 
-inline void configLoggerLevel(logger_level_e newlevel)
+inline void NW_Logger_ConfigLevel(NW_LoggerLevel newlevel)
 {
     loglevel = newlevel;
 }
 
-void report(logger_level_e level, const char * fmt, ...);
+void NW_Logger_Report(NW_LoggerLevel level, const char * fmt, ...);
 
 #endif
