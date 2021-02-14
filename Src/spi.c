@@ -135,7 +135,32 @@ void MX_SPI2_Init(void)
 }
 
 /* USER CODE BEGIN 1 */
+int8_t NW_SPI2_Send_DMA(uint32_t addr, uint32_t count)
+{
+  uint16_t timeout = 2000;
 
+  if (!addr || !count)
+    return -2;
+  
+  while (!LL_SPI_IsActiveFlag_TXE(SPI2))
+  {
+    if (--timeout == 0)
+      return -1;
+  }
+
+  ///< Disable DMA to load new length to be tranmitted
+  LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_5);
+  ///< set length to be tranmitted
+  LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, count);
+  ///< configure address to be transmitted by DMA
+  LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_5, addr, (uint32_t)&(SPI2->DR), LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+  ///< Enable DMA again
+  LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
+  ///< Fire
+  LL_SPI_EnableDMAReq_TX(SPI2);
+
+  return 0;
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

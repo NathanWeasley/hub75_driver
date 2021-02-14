@@ -21,12 +21,7 @@
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
-#include "display/display_info.h"
 
-#define TIM2_CLK_FREQ       (72000000ul)
-#define TIM2_OVF_PER_FRAME  (NW_DISPLAY_SCAN_DIVIDER * NW_DISPLAY_DEPTH)
-#define TIM2_OVF_PER_SECOND (TIM2_OVF_PER_FRAME * NW_DESIRED_FPS)
-#define TIM2_RELOAD         (TIM2_CLK_FREQ / TIM2_OVF_PER_SECOND)
 /* USER CODE END 0 */
 
 /* TIM2 init function */

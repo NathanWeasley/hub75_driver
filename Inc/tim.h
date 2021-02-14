@@ -27,10 +27,21 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "display/display_info.h"
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
+
+/**
+ * TIM2 is used for PWM generation
+ * The overflow time is calculated from desired fps.
+ * Time for OC output should be calculated from this value.
+ */
+
+#define TIM2_CLK_FREQ       (72000000ul)
+#define TIM2_OVF_PER_FRAME  (NW_DISPLAY_SCAN_DIVIDER * NW_DISPLAY_DEPTH)
+#define TIM2_OVF_PER_SECOND (TIM2_OVF_PER_FRAME * NW_DESIRED_FPS)
+#define TIM2_RELOAD         (TIM2_CLK_FREQ / TIM2_OVF_PER_SECOND)
 
 /* USER CODE END Private defines */
 

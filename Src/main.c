@@ -29,6 +29,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "logger/logger_api.h"
+#include "display/rgb_output.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -113,6 +114,8 @@ int main(void)
   NW_UART_Send("Hello\r\n", 7);
   for (i = 0; i < 20; ++i)
     NW_Logger_Report(LOGGER_INFO, "Test output: %d.", i);
+
+  NW_LED_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */

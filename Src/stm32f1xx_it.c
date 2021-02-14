@@ -28,6 +28,8 @@
 #include "display/rgb_output.h"
 #include "task/task.h"
 #include "gpio.h"
+#include "tim.h"
+#include "dma.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -253,20 +255,28 @@ void DMA1_Channel7_IRQHandler(void)
   */
 void TIM2_IRQHandler(void)
 {
+  TOGGLE_USER_LED;
+
   /* USER CODE BEGIN TIM2_IRQn 0 */
     if (LL_TIM_IsActiveFlag_UPDATE(TIM2))
     {
         LL_TIM_ClearFlag_UPDATE(TIM2);
 
-        /** Select current row */
-        GPIOC->ODR = 0x0F & NW_LED_GetCurrentRow();
+        /**
+         * Select row and latch previous data
+         * The latched data will be on display in the
+         * upcoming scan interval
+         */
+        NW_LED_SelectRowAndLatch();
 
-        /** Latch loaded data */
-        RGBLED_LAT_GPIO_Port->BSRR = RGBLED_LAT_Pin;
-        RGBLED_LAT_GPIO_Port->BRR = RGBLED_LAT_Pin;
-
-        /** Bringup task for next bit/row */
-        NW_Task_StartSpecific(NW_LED_GetPrepareTask());
+        /**
+         * Prepare for next bit/row
+         * This function executes the following:
+         * 1> Construct bitstream from VRAM
+         * 2> Send bitstream through SPI
+         * 3> Preload OC1 value for the next period
+         */
+        NW_LED_PrepareLine();
     }
   /* USER CODE END TIM2_IRQn 0 */
   /* USER CODE BEGIN TIM2_IRQn 1 */

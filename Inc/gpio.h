@@ -32,7 +32,7 @@
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
-
+#define TOGGLE_USER_LED     (LD2_GPIO_Port->ODR ^= LD2_Pin)
 /* USER CODE END Private defines */
 
 void MX_GPIO_Init(void);

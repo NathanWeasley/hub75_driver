@@ -38,7 +38,7 @@ void MX_SPI1_Init(void);
 void MX_SPI2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+int8_t NW_SPI2_Send_DMA(uint32_t addr, uint32_t count);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
