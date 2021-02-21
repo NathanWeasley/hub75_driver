@@ -3,15 +3,12 @@ clear; clc; close all;
 width = 64;
 height = 32;
 depth = 5;
+gamma = 2.4;
 
-IMG = double(imread('rainbow.bmp')) / 255;
+%% Image process
+
+IMG = imread('sankarea.bmp');
 IMG = imresize(IMG, [height, width]);
-
-% Gamma correction
-gamma = 0.45;
-IMG = uint8(255*IMG.^(1/gamma));
-
-IMG = bitshift(IMG, -(8-depth));
 
 for i = 1:1:3
     for j = 1:1:height
@@ -22,4 +19,11 @@ for i = 1:1:3
     end
 end
 
-imshow(IMG*(2^(8-depth)));
+imshow(IMG);
+
+%% Gamma correction LUT
+% [0 .. 255] -> [0 .. 2^d-1]
+
+garray = 0:1:255;
+rarray = 255*(garray/255).^gamma;
+rarray = bitshift(uint8(rarray), -(8-depth));

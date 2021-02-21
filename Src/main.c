@@ -112,8 +112,6 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   NW_UART_Send("Hello\r\n", 7);
-  for (i = 0; i < 20; ++i)
-    NW_Logger_Report(LOGGER_INFO, "Test output: %d.", i);
 
   NW_LED_Init();
   /* USER CODE END 2 */

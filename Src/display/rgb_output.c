@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 
 #define NW_ROW_GROUP_CNT    (NW_DISPLAY_HEIGHT / NW_DISPLAY_SCAN_DIVIDER)
 #define NW_ROW_JUMP         (NW_DISPLAY_WIDTH * NW_DISPLAY_SCAN_DIVIDER)
@@ -16,6 +17,7 @@
 uint8_t g_pBitMask[NW_DISPLAY_DEPTH];               ///< This mask table is naturally listed as [1, 2, 4, 8, 16, ...]
 uint8_t g_pVRAM[NW_DISPLAY_HEIGHT * NW_DISPLAY_WIDTH * NW_DISPLAY_CHANNEL];
 uint8_t g_pLineData[NW_BITS_PER_LINE / 8];
+uint8_t g_pGammaLUT[256];
 uint8_t g_currentRow = 0;
 uint8_t g_currentBit = 0;
 uint8_t g_bRowUpdate = 0;
@@ -26,7 +28,7 @@ NW_TaskId g_rowPrepareTaskId = NW_InvalidTask;
 void NW_LED_PrepareLine()
 {
     uint8_t k, bmask = g_pBitMask[g_currentBit];
-    uint8_t *pRRow, *pGRow, *pBRow, *pLine = g_pLineData;
+    uint8_t *pRRow, *pGRow, *pBRow, *pLine = g_pLineData, gdata;
     uint16_t pwmcc = TIM2_RELOAD - 220;
     uint32_t i, j, rowbias = NW_DISPLAY_WIDTH * (uint32_t)g_currentRow;
     int8_t res;
@@ -46,7 +48,9 @@ void NW_LED_PrepareLine()
         
         for (j = 0; j < NW_DISPLAY_WIDTH; ++j, ++pRRow)
         {
-            *pLine |= (*pRRow & bmask) ? k : 0x00;          ///< Fill corresponding bit in line data
+            gdata = g_pGammaLUT[*pRRow];
+            *pLine |= (gdata & bmask) ? k : 0x00;
+            // *pLine |= ((*pRRow >> 3) & bmask) ? k : 0x00;
             if ((k <<= 1) == 0)
             {
                 k = 0x01;
@@ -57,7 +61,9 @@ void NW_LED_PrepareLine()
 
         for (j = 0; j < NW_DISPLAY_WIDTH; ++j, ++pGRow)
         {
-            *pLine |= (*pGRow & bmask) ? k : 0x00;          ///< Fill corresponding bit in line data
+            gdata = g_pGammaLUT[*pGRow];
+            *pLine |= (gdata & bmask) ? k : 0x00;
+            // *pLine |= ((*pGRow >> 3) & bmask) ? k : 0x00;
             if ((k <<= 1) == 0)
             {
                 k = 0x01;
@@ -68,7 +74,9 @@ void NW_LED_PrepareLine()
 
         for (j = 0; j < NW_DISPLAY_WIDTH; ++j, ++pBRow)
         {
-            *pLine |= (*pBRow & bmask) ? k : 0x00;          ///< Fill corresponding bit in line data
+            gdata = g_pGammaLUT[*pBRow];
+            *pLine |= (gdata & bmask) ? k : 0x00;
+            // *pLine |= ((*pBRow >> 3) & bmask) ? k : 0x00;
             if ((k <<= 1) == 0)
             {
                 k = 0x01;
@@ -92,14 +100,6 @@ void NW_LED_PrepareLine()
 
     /** Preload PWM OC counter */
     LL_TIM_OC_SetCompareCH1(TIM2, TIM2_RELOAD - pwmcc / g_pBitMask[NW_DISPLAY_DEPTH-1 - g_currentBit]);
-
-    /** Increment on channel bits and row */
-
-    if (++g_currentBit >= NW_DISPLAY_DEPTH)
-    {
-        g_currentBit = 0;
-        g_bRowUpdate = 1;
-    }
 }
 
 void NW_LED_SelectRowAndLatch()
@@ -111,12 +111,12 @@ void NW_LED_SelectRowAndLatch()
     RGBLED_LAT_GPIO_Port->BSRR = RGBLED_LAT_Pin;
     RGBLED_LAT_GPIO_Port->BRR = RGBLED_LAT_Pin;
 
-    /** Increment on row selection */
-    if (g_bRowUpdate > 0)
+    /** Increase row */
+    if (++g_currentRow >= NW_DISPLAY_SCAN_DIVIDER)
     {
-        g_bRowUpdate = 0;
-        if (++g_currentRow >= NW_DISPLAY_SCAN_DIVIDER)
-            g_currentRow = 0;
+        g_currentRow = 0;
+        if (++g_currentBit >= NW_DISPLAY_DEPTH)
+            g_currentBit = 0;
     }
 }
 
@@ -139,13 +139,29 @@ NW_TaskId NW_LED_CreatePrepareTask()
 void NW_LED_Init()
 {
     uint8_t i;
+    uint16_t j;
     uint8_t * pR = g_pVRAM;
     uint8_t * pG = g_pVRAM + NW_DISPLAY_WIDTH * NW_DISPLAY_HEIGHT;
     uint8_t * pB = g_pVRAM + NW_DISPLAY_WIDTH * NW_DISPLAY_HEIGHT * 2;
+    float fwork = 0;
 
     /** Initialize bit mask table */
     for (i = 0; i < NW_DISPLAY_DEPTH; ++i)
         g_pBitMask[i] = 1 << i;
+
+    /** Initialize Gamma LUT */
+    for (j = 0; j < 256; ++j)
+    {
+        fwork = j / 255.f;                          ///< Normalize
+        fwork = powf(fwork, NW_DISPLAY_GAMMA);      ///< Calculate correction
+        fwork *= 255;                               ///< Denormalize
+        g_pGammaLUT[j] = (uint8_t)fwork >> (8-NW_DISPLAY_DEPTH);
+    }
+    // for (j = 0; j < 256; ++j)
+    // {
+    //     NW_Logger_Report(LOGGER_INFO, "LUT: %d -> %d", j, g_pGammaLUT[j]);
+    //     LL_mDelay(100);
+    // }
 
     /** Reset row and bit pointers */
     g_currentRow = 0;
