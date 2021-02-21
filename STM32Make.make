@@ -46,6 +46,7 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_tim.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_usart.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_utils.c \
 Src/display/rgb_output.c \
+Src/display/startup_img.c \
 Src/dma.c \
 Src/gpio.c \
 Src/logger/logger_api.c \

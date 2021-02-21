@@ -1,4 +1,5 @@
 #include "display/rgb_output.h"
+#include "display/startup_img.h"
 #include "logger/logger_api.h"
 #include "spi.h"
 #include "gpio.h"
@@ -17,6 +18,7 @@ uint8_t g_pVRAM[NW_DISPLAY_HEIGHT * NW_DISPLAY_WIDTH * NW_DISPLAY_CHANNEL];
 uint8_t g_pLineData[NW_BITS_PER_LINE / 8];
 uint8_t g_currentRow = 0;
 uint8_t g_currentBit = 0;
+uint8_t g_bRowUpdate = 0;
 const uint16_t g_maxIntensity = 1 << NW_DISPLAY_DEPTH;
 
 NW_TaskId g_rowPrepareTaskId = NW_InvalidTask;
@@ -25,14 +27,17 @@ void NW_LED_PrepareLine()
 {
     uint8_t k, bmask = g_pBitMask[g_currentBit];
     uint8_t *pRRow, *pGRow, *pBRow, *pLine = g_pLineData;
+    uint16_t pwmcc = TIM2_RELOAD - 220;
     uint32_t i, j, rowbias = NW_DISPLAY_WIDTH * (uint32_t)g_currentRow;
     int8_t res;
+
+    *pLine = 0;
 
     /** Process row group */
 
     pRRow = g_pVRAM + rowbias;
-    pGRow = g_pVRAM + rowbias + NW_DISPLAY_HEIGHT * NW_DISPLAY_WIDTH;
-    pBRow = g_pVRAM + rowbias + NW_DISPLAY_HEIGHT * NW_DISPLAY_WIDTH * 2;
+    pBRow = g_pVRAM + rowbias + NW_DISPLAY_HEIGHT * NW_DISPLAY_WIDTH;
+    pGRow = g_pVRAM + rowbias + NW_DISPLAY_HEIGHT * NW_DISPLAY_WIDTH * 2;
     for (i = 0; i < NW_ROW_GROUP_CNT; ++i)
     {
         k = 0x01;
@@ -46,6 +51,7 @@ void NW_LED_PrepareLine()
             {
                 k = 0x01;
                 ++pLine;
+                *pLine = 0;
             }
         }
 
@@ -56,6 +62,7 @@ void NW_LED_PrepareLine()
             {
                 k = 0x01;
                 ++pLine;
+                *pLine = 0;
             }
         }
 
@@ -66,21 +73,13 @@ void NW_LED_PrepareLine()
             {
                 k = 0x01;
                 ++pLine;
+                *pLine = 0;
             }
         }
 
         pRRow += NW_ROW_JUMP - NW_DISPLAY_WIDTH;
         pGRow += NW_ROW_JUMP - NW_DISPLAY_WIDTH;
         pBRow += NW_ROW_JUMP - NW_DISPLAY_WIDTH;
-    }
-
-    /** Increment on channel bits and row */
-
-    if (++g_currentBit >= NW_DISPLAY_DEPTH)
-    {
-        g_currentBit = 0;
-        if (++g_currentRow >= NW_DISPLAY_SCAN_DIVIDER)
-            g_currentRow = 0;
     }
 
     /** Send Data through SPI */
@@ -92,10 +91,15 @@ void NW_LED_PrepareLine()
     }
 
     /** Preload PWM OC counter */
-    LL_TIM_OC_SetCompareCH1(TIM2, TIM2_RELOAD - TIM2_RELOAD / g_pBitMask[NW_DISPLAY_DEPTH-1 - g_currentBit]);
+    LL_TIM_OC_SetCompareCH1(TIM2, TIM2_RELOAD - pwmcc / g_pBitMask[NW_DISPLAY_DEPTH-1 - g_currentBit]);
 
-    /** Debugging only */
-    // TOGGLE_USER_LED;
+    /** Increment on channel bits and row */
+
+    if (++g_currentBit >= NW_DISPLAY_DEPTH)
+    {
+        g_currentBit = 0;
+        g_bRowUpdate = 1;
+    }
 }
 
 void NW_LED_SelectRowAndLatch()
@@ -106,14 +110,15 @@ void NW_LED_SelectRowAndLatch()
     /** Latch loaded data */
     RGBLED_LAT_GPIO_Port->BSRR = RGBLED_LAT_Pin;
     RGBLED_LAT_GPIO_Port->BRR = RGBLED_LAT_Pin;
+
+    /** Increment on row selection */
+    if (g_bRowUpdate > 0)
+    {
+        g_bRowUpdate = 0;
+        if (++g_currentRow >= NW_DISPLAY_SCAN_DIVIDER)
+            g_currentRow = 0;
+    }
 }
-
-uint8_t NW_LED_GetCurrentBit()
-{
-    return g_pBitMask[NW_DISPLAY_DEPTH-1 - g_currentBit];
-}
-
-
 
 NW_TaskId NW_LED_GetPrepareTask()
 {
@@ -136,7 +141,7 @@ void NW_LED_Init()
     uint8_t i;
     uint8_t * pR = g_pVRAM;
     uint8_t * pG = g_pVRAM + NW_DISPLAY_WIDTH * NW_DISPLAY_HEIGHT;
-    // uint8_t * pB = g_pVRAM + NW_DISPLAY_WIDTH * 2;
+    uint8_t * pB = g_pVRAM + NW_DISPLAY_WIDTH * NW_DISPLAY_HEIGHT * 2;
 
     /** Initialize bit mask table */
     for (i = 0; i < NW_DISPLAY_DEPTH; ++i)
@@ -147,15 +152,19 @@ void NW_LED_Init()
     g_currentBit = 0;
 
     /** Zero-initialize all vmems */
-    memset(g_pVRAM, 0x00, NW_DISPLAY_HEIGHT * NW_DISPLAY_WIDTH * NW_DISPLAY_CHANNEL);
+    memset(g_pVRAM, 0x00, NW_BYTES_PER_FRAME);
     memset(g_pLineData, 0x00, NW_BITS_PER_LINE / 8);
 
     /** TESTONLY: Fill the first row in VRAM */
-    for (i = 0; i < NW_DISPLAY_WIDTH; ++i)
+
+    for (i = 0; i < g_maxIntensity; ++i)
     {
-        pR[i] = i * g_maxIntensity / NW_DISPLAY_WIDTH;
-        pG[i] = (NW_DISPLAY_WIDTH - i - 1) * g_maxIntensity / NW_DISPLAY_WIDTH;
+        pR[i] = g_maxIntensity - i - 1;
+        pG[i + NW_DISPLAY_WIDTH*NW_DISPLAY_SCAN_DIVIDER] = i;
     }
+
+    memcpy(g_pVRAM, img, NW_BYTES_PER_FRAME);
+    pR[0] = 10;
 
     /** Enable SPI */
     LL_SPI_Enable(SPI2);

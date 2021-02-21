@@ -18,7 +18,6 @@ extern uint8_t g_currentRow;
 void NW_LED_PrepareLine();
 void NW_LED_SelectRowAndLatch();
 void NW_LED_SendLine();
-uint8_t NW_LED_GetCurrentBit();
 static inline uint8_t NW_LED_GetCurrentRow()
 {
     return g_currentRow;

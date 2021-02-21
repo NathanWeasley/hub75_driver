@@ -46,6 +46,7 @@ Src/stm32f1xx_it.c \
 Src/system_stm32f1xx.c \
 Src/logger/logger_api.c \
 Src/display/rgb_output.c \
+Src/display/startup_img.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_rcc.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_utils.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_exti.c \
