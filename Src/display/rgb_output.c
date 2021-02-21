@@ -50,7 +50,6 @@ void NW_LED_PrepareLine()
         {
             gdata = g_pGammaLUT[*pRRow];
             *pLine |= (gdata & bmask) ? k : 0x00;
-            // *pLine |= ((*pRRow >> 3) & bmask) ? k : 0x00;
             if ((k <<= 1) == 0)
             {
                 k = 0x01;
@@ -63,7 +62,6 @@ void NW_LED_PrepareLine()
         {
             gdata = g_pGammaLUT[*pGRow];
             *pLine |= (gdata & bmask) ? k : 0x00;
-            // *pLine |= ((*pGRow >> 3) & bmask) ? k : 0x00;
             if ((k <<= 1) == 0)
             {
                 k = 0x01;
@@ -76,7 +74,6 @@ void NW_LED_PrepareLine()
         {
             gdata = g_pGammaLUT[*pBRow];
             *pLine |= (gdata & bmask) ? k : 0x00;
-            // *pLine |= ((*pBRow >> 3) & bmask) ? k : 0x00;
             if ((k <<= 1) == 0)
             {
                 k = 0x01;
@@ -157,11 +154,6 @@ void NW_LED_Init()
         fwork *= 255;                               ///< Denormalize
         g_pGammaLUT[j] = (uint8_t)fwork >> (8-NW_DISPLAY_DEPTH);
     }
-    // for (j = 0; j < 256; ++j)
-    // {
-    //     NW_Logger_Report(LOGGER_INFO, "LUT: %d -> %d", j, g_pGammaLUT[j]);
-    //     LL_mDelay(100);
-    // }
 
     /** Reset row and bit pointers */
     g_currentRow = 0;
@@ -171,16 +163,8 @@ void NW_LED_Init()
     memset(g_pVRAM, 0x00, NW_BYTES_PER_FRAME);
     memset(g_pLineData, 0x00, NW_BITS_PER_LINE / 8);
 
-    /** TESTONLY: Fill the first row in VRAM */
-
-    for (i = 0; i < g_maxIntensity; ++i)
-    {
-        pR[i] = g_maxIntensity - i - 1;
-        pG[i + NW_DISPLAY_WIDTH*NW_DISPLAY_SCAN_DIVIDER] = i;
-    }
-
+    /** TESTONLY: Fill the default image */
     memcpy(g_pVRAM, img, NW_BYTES_PER_FRAME);
-    pR[0] = 10;
 
     /** Enable SPI */
     LL_SPI_Enable(SPI2);
